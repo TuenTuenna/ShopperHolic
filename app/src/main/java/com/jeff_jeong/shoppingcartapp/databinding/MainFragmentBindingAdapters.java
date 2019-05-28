@@ -13,6 +13,7 @@ public class MainFragmentBindingAdapters {
 
     private static final int NUM_COLUMNS = 2;
 
+    // 노테이션을 함으로써 xml 파일에서 사용가능하다.
     @BindingAdapter("productsList")
     public static void setProductsList(RecyclerView view, List<Product> products){
 

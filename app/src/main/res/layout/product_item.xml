@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout >
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <import type="com.jeff_jeong.shoppingcartapp.util.BigDecimalUtil"/>
         <import type="android.view.View"/>
         <variable
             name="product"
-            type="com.jeff_jeong.shoppingcartapp.models.Product"/>
+            type="com.jeff_jeong.shoppingcartapp.models.Product"
+            />
     </data>
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -27,7 +28,8 @@
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
                 android:id="@+id/image"
-                android:src="@{product.image}"/>
+                app:imageUrl="@{product.image}"
+                />
 
         </RelativeLayout>
 
@@ -89,7 +91,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     style="?attr/ratingBarStyleSmall"
-                    android:theme="@style/RatingBar"
+                    android:theme="@style/Widget.AppCompat.RatingBar"
                     android:scaleX="1.2"
                     android:scaleY="1.2"
                     android:numStars="5"

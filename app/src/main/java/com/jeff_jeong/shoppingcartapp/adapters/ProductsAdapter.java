@@ -45,7 +45,22 @@ public class ProductsAdapter extends  RecyclerView.Adapter<ProductsAdapter.Bindi
     @Override
     public void onBindViewHolder(BindingHolder holder, int position) {
         Product product = mProducts.get(position);
+        //         <variable
+//            name="product"
+//            type="com.jeff_jeong.shoppingcartapp.models.Product"
+//            />
+        // 프로덕트 인스턴스가 들어가게 되고
         holder.binding.setProduct(product);
+//         <variable
+//            name="testUrl"
+//            type="String"
+//            />
+        // xml 파일에서 variable 을 정의한 이름으로 setTestUrl 메소드가 만들어진다.
+        // url 테스트
+//        holder.binding.setTestUrl("https://www.sound-crowd.com/soundCrowdMobile/uploads/images/artworks/20190329_5c9d9ae06c3b4_044 (여자)아이들 - Senorita.jpeg");
+
+        // 일반적인 방법
+        // ViewDataBinding binding 이것을 사용하면 아래 것을 써야함
 //        holder.binding.setVariable(BR.product, product);
         holder.binding.executePendingBindings();
     }
