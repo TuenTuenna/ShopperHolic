@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <import type="com.jeff_jeong.shoppingcartapp.util.BigDecimalUtil"/>
         <import type="com.jeff_jeong.shoppingcartapp.util.StringUtil"/>
         <import type="android.view.View"/>
-        
+
         <variable
-            name="product"
-            type="com.jeff_jeong.shoppingcartapp.models.Product"/>
+            name="iMainActivity"
+            type="com.jeff_jeong.shoppingcartapp.IMainActivity"
+            />
+
         <variable
-            name="qty"
-            type="int"/>
+            name="productViewModel"
+            type="com.jeff_jeong.shoppingcartapp.viewmodel.ProductViewModel"/>
 
     </data>
     <RelativeLayout
@@ -18,7 +20,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/White">
-        
+
+        <ProgressBar
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:id="@+id/progress_bar"
+            android:layout_centerInParent="true"
+            android:visibility="@{productViewModel.imageVisibility ? View.GONE : View.VISIBLE}"
+            />
+
         
         <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
@@ -27,7 +37,9 @@
             android:orientation="vertical"
             android:padding="10dp"
             android:background="@color/White"
-            android:id="@+id/container_view">
+            android:id="@+id/container_view"
+            android:visibility="@{productViewModel.imageVisibility ? View.VISIBLE : View.INVISIBLE}"
+            >
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -42,7 +54,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="10sp"
                     android:textColor="@color/DarkGrey"
-                    android:text="@{product.getNumberRatingsString()}"
+                    android:text="@{productViewModel.product.getNumberRatingsString()}"
                     android:id="@+id/num_ratings"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentRight="true"
@@ -53,11 +65,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     style="?attr/ratingBarStyleSmall"
-                    android:theme="@style/RatingBar"
+                    android:theme="@style/CustomRatingBar"
                     android:scaleX="1.2"
                     android:scaleY="1.2"
                     android:numStars="5"
-                    android:rating="@{BigDecimalUtil.getFloat(product.rating)}"
+                    android:rating="@{BigDecimalUtil.getFloat(productViewModel.product.rating)}"
                     android:id="@+id/rating"
                     android:isIndicator="true"
                     android:layout_toLeftOf="@+id/num_ratings"
@@ -71,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/title"
                 android:textColor="@color/Black"
-                android:text="@{product.title}"
+                android:text="@{productViewModel.product.title}"
                 android:textSize="14sp"
                 android:layout_marginTop="5dp"/>
 
@@ -88,7 +100,9 @@
                     android:layout_centerHorizontal="true"
                     android:layout_centerVertical="true"
                     android:id="@+id/image"
-                    android:src="@{product.image}"/>
+                    app:imageResource="@{productViewModel.product.image}"
+                    app:requestListener="@{productViewModel.customRequestListener}"
+                    />
 
             </RelativeLayout>
 
@@ -109,7 +123,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
                     android:textColor="@color/red2"
-                    android:text="@{product.hasSalePrice() ?  BigDecimalUtil.getValue(product.sale_price) : BigDecimalUtil.getValue(product.price)}"
+                    android:text="@{productViewModel.product.hasSalePrice() ?  BigDecimalUtil.getValue(productViewModel.product.sale_price) : BigDecimalUtil.getValue(productViewModel.product.price)}"
                     android:id="@+id/price"/>
 
              
@@ -118,10 +132,10 @@
                     android:layout_height="wrap_content"
                     android:textSize="10sp"
                     android:textColor="@color/DarkGrey"
-                    android:text="@{BigDecimalUtil.getValue(product.price)}"
+                    android:text="@{BigDecimalUtil.getValue(productViewModel.product.price)}"
                     android:id="@+id/original_price"
                     android:layout_marginLeft="10dp"
-                    android:visibility="@{product.hasSalePrice() ? View.VISIBLE  : View.GONE}"
+                    android:visibility="@{productViewModel.product.hasSalePrice() ? View.VISIBLE  : View.GONE}"
                     android:background="@drawable/strike_through"/>
 
             </LinearLayout>
@@ -133,6 +147,7 @@
                 android:background="@drawable/grey_rounded_button"
                 android:layout_marginTop="13dp"
                 android:id="@+id/quantity_button"
+                android:onClick="@{() -> iMainActivity.showQuantityDialog()}"
                 >
 
              
@@ -141,7 +156,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="12sp"
                     android:textColor="@color/Black"
-                    android:text="@{StringUtil.getQuantityString(qty)}"
+                    android:text="@{StringUtil.getQuantityString(productViewModel.quantity)}"
                     android:id="@+id/quantity"/>
 
                 <ImageView
@@ -162,7 +177,9 @@
                 android:padding="12dp"
                 android:layout_marginTop="13dp"
                 android:background="@drawable/orange_rounded_button"
-                android:id="@+id/add_to_cart">
+                android:id="@+id/add_to_cart"
+                android:onClick="@{() -> iMainActivity.addToCart(productViewModel.product, productViewModel.quantity)}"
+                >
 
                 <TextView
                     android:layout_width="wrap_content"

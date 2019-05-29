@@ -2,11 +2,13 @@ package com.jeff_jeong.shoppingcartapp.adapters;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.jeff_jeong.shoppingcartapp.IMainActivity;
 import com.jeff_jeong.shoppingcartapp.R;
 import com.jeff_jeong.shoppingcartapp.databinding.ProductItemBinding;
 import com.jeff_jeong.shoppingcartapp.models.Product;
@@ -20,6 +22,8 @@ public class ProductsAdapter extends  RecyclerView.Adapter<ProductsAdapter.Bindi
 
     private List<Product> mProducts = new ArrayList<>();
     private Context mContext;
+    // 메인 액티비티 인터페이스
+
 
     public ProductsAdapter(Context context, List<Product> products) {
         mProducts = products;
@@ -44,13 +48,18 @@ public class ProductsAdapter extends  RecyclerView.Adapter<ProductsAdapter.Bindi
 
     @Override
     public void onBindViewHolder(BindingHolder holder, int position) {
-        Product product = mProducts.get(position);
+        final Product product = mProducts.get(position);
         //         <variable
 //            name="product"
 //            type="com.jeff_jeong.shoppingcartapp.models.Product"
 //            />
         // 프로덕트 인스턴스가 들어가게 되고
         holder.binding.setProduct(product);
+
+        // 이렇게 함으로써 메인액티비티 인터페이스를 뷰에 추가했다.
+        holder.binding.setIMainActivity((IMainActivity) mContext);
+
+
 //         <variable
 //            name="testUrl"
 //            type="String"

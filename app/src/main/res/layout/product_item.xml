@@ -7,6 +7,10 @@
             name="product"
             type="com.jeff_jeong.shoppingcartapp.models.Product"
             />
+        <variable
+            name="iMainActivity"
+            type="com.jeff_jeong.shoppingcartapp.IMainActivity"
+            />
     </data>
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -15,7 +19,9 @@
         android:layout_height="300dp"
         android:padding="10dp"
         android:background="@drawable/grey_border"
-        android:id="@+id/item_container">
+        android:id="@+id/item_container"
+        android:onClick="@{()->iMainActivity.inflateViewProductFragment(product)}"
+        >
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -91,7 +97,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     style="?attr/ratingBarStyleSmall"
-                    android:theme="@style/Widget.AppCompat.RatingBar"
+                    android:theme="@style/CustomRatingBar"
                     android:scaleX="1.2"
                     android:scaleY="1.2"
                     android:numStars="5"
