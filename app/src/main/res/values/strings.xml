@@ -13,7 +13,7 @@
     <string name="intent_product">intent_product</string>
 
     <!-- Strings -->
-    <string name="dialog_quantity_title">Qty: </string>
+    <string name="dialog_quantity_title">갯수: </string>
     <string name="cart_subtotal">Cart subtotal</string>
-    <string name="proceed_to_checkout">Proceed to Checkout</string>
+    <string name="proceed_to_checkout">결제 진행</string>
 </resources>

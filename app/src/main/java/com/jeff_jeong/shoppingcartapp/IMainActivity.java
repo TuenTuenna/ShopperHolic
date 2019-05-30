@@ -1,5 +1,6 @@
 package com.jeff_jeong.shoppingcartapp;
 
+import com.jeff_jeong.shoppingcartapp.models.CartItem;
 import com.jeff_jeong.shoppingcartapp.models.Product;
 
 // 프래그먼트끼리는 직접적으로 통신하면 안된다.
@@ -24,6 +25,12 @@ public interface IMainActivity {
 
     // 장바구니 보임여부를 설정하는 메소드
     void setCartVisibility(boolean visibility);
+
+    // 수량을 갱신하는 메소드
+    void updateQuantity(Product product, int quantity);
+
+    // 장바구니 아이템을 삭제하는 메소드
+    void removeCartItem(CartItem cartItem);
 
 
 }

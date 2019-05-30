@@ -2,6 +2,7 @@ package com.jeff_jeong.shoppingcartapp;
 
 import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -31,7 +32,11 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
     //data binding
     ActivityMainBinding mBinding;
 
-
+    // vars
+    private boolean mClickToExit = false;
+    private Handler mCheckoutHandler;
+    private int mCheckoutTimer = 0;
+    private Runnable mCheckoutRunnable;
 
 
     @Override
@@ -41,6 +46,10 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
 
         // 바인딩 인스턴스의 장바구니에 터치 리스너를 설정한다.
         mBinding.cart.setOnTouchListener(new CartTouchListener());
+
+        // 결제 버튼에 클릭 리스너를 설정한다.
+        // android:id="@+id/proceed_to_checkout"
+        mBinding.proceedToCheckout.setOnClickListener(mCheckoutListener);
 
         // 장바구니를 가져온다.
         getShoppingCart();
@@ -58,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
     }
 
     // 장바구니를 가져오는 메소드
+    // 쉐어드에 있는 장바구니 정보를 가져와서 뷰에 적용시킨다.
     private void getShoppingCart() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         Set<String> serialNumbers = preferences.getStringSet(PreferenceKeys.shopping_cart, new HashSet<String>());
@@ -200,6 +210,144 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
         // 바인딩 인스턴스에 장바구니 보임여부를 설정한다.
         mBinding.getCartViewModel().setCartVisible(visibility);
     }
+
+    // 수량이 갱신되어질때
+    @Override
+    public void updateQuantity(Product product, int quantity) {
+        // 쉐어드에서
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        // 현재 재품수량을 가져온다.
+        int currentQuantity = preferences.getInt(String.valueOf(product.getSerial_number()),0);
+
+        // 현재의 재품수량에 추가된 제품수량을 계산한다.
+        editor.putInt(String.valueOf(product.getSerial_number()), (currentQuantity + quantity));
+        // 쉐어드에 변경사항을 저장한다.
+        editor.commit();
+
+        // 장바구니를 가져온다.
+        getShoppingCart();
+
+    }
+
+    // 장바구니 아이템 제거 메소드가 발동될때
+    @Override
+    public void removeCartItem(CartItem cartItem) {
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        // 해당 장바구니 아이템을 쉐어드에서 제거한다.
+        editor.remove(String.valueOf(cartItem.getProduct().getSerial_number()));
+        editor.commit();
+
+        // 쉐어드에서 제품 시리얼 넘버 해쉬셋을 가져온다.
+        Set<String> serialNumbers = preferences.getStringSet(PreferenceKeys.shopping_cart, new HashSet<String>());
+
+        // 제품시리얼 넘버가 1개 이면
+        if(serialNumbers.size() == 1){
+            // 장바구니 쉐어드 자체를 지운다.
+            editor.remove(PreferenceKeys.shopping_cart);
+            editor.commit();
+        }
+        else { // 제품시리얼 넘버가 여러개 이면
+            // 제품시리얼 넘버 해쉬셋에서 해당 아이템 만 제거한다.
+            serialNumbers.remove(String.valueOf(cartItem.getProduct().getSerial_number()));
+            editor.putStringSet(PreferenceKeys.shopping_cart, serialNumbers);
+            editor.commit();
+        }
+
+        // 장바구니를 가져온다.
+        getShoppingCart();
+
+        // 장바구니 프래그먼트를 가져와서
+        ViewCartFragment fragment = (ViewCartFragment)getSupportFragmentManager().findFragmentByTag(getString(R.string.fragment_view_cart));
+        // 보여지고 있는 상태이면
+        if(fragment != null){
+            // 장바구니 프래그먼트에서 장바구니 아이템들을 갱신한다.
+            fragment.updateCartItems();
+        }
+
+
+    }
+
+    // 결제 메소드
+    public void checkout(){
+        // 프로그래스바를 보여준다.
+        mBinding.progressBar.setVisibility(View.VISIBLE);
+
+        // 핸들러 인스턴스화
+        mCheckoutHandler = new Handler();
+        mCheckoutRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mCheckoutHandler.postDelayed(mCheckoutRunnable, 200);
+                mCheckoutTimer += 200;
+                if(mCheckoutTimer >= 1600){
+                    // 장바구니를 비운다.
+                    emptyCart();
+                    // 프로그래스바를 숨긴다.
+                    mBinding.progressBar.setVisibility(View.GONE);
+                    // 콜백제거
+                    mCheckoutHandler.removeCallbacks(mCheckoutRunnable);
+                    // 결제타이머 리셋
+                    mCheckoutTimer = 0;
+                }
+            }
+        };
+        // 핸들러 돌리기
+        mCheckoutRunnable.run();
+    }
+
+    // 장바구니를 비우는 메소드
+    public void emptyCart(){
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        // 시리얼넘버 해시셋 가져오기
+        Set<String> serialNumbers = preferences.getStringSet(PreferenceKeys.shopping_cart, new HashSet<String>());
+
+        for(String serialNumber : serialNumbers){
+            editor.remove(serialNumber);
+            editor.commit();
+        }
+
+        //
+        editor.remove(PreferenceKeys.shopping_cart);
+        editor.commit();
+
+        Toast.makeText(this, "이용해 주셔서 감사합니다.", Toast.LENGTH_SHORT).show();
+
+        removeViewCartFragment();
+        // 장바구니를 가져온다.
+        getShoppingCart();
+
+    }
+
+
+    // 장바구니 프래그먼트를 제거하는 메소드
+    public void removeViewCartFragment(){
+        getSupportFragmentManager().popBackStack();
+        ViewCartFragment fragment = (ViewCartFragment) getSupportFragmentManager().findFragmentByTag(getString(R.string.fragment_view_cart));
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        if(fragment != null){
+            transaction.remove(fragment);
+            transaction.commit();
+        }
+    }
+
+
+    // 클릭 리스너
+    public View.OnClickListener mCheckoutListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            // 결제를 진행한다.
+            checkout();
+        }
+    };
+
 
     // 장바구니 터치 리스너 클래스
     public static class CartTouchListener implements View.OnTouchListener {
